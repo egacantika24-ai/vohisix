@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencarian DUDI - SMKN 6 Malang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/dashboard-siswa.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/cari-dudi.css') }}">
+    <style>
+        /* Additional CSS untuk komponen yang belum ada di cari-dudi.css */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            color: #003056;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .pagination a:hover {
+            background-color: #003056;
+            color: white;
+            border-color: #003056;
+        }
+
+        .pagination span.pagination-points {
+            border: none;
+            color: #94a3b8;
+        }
+
+        .pagination .active span {
+            background-color: #003056;
+            color: white;
+            border-color: #003056;
+        }
+
+        /* Company name ellipsis */
+        .company-name {
+            display: block;
+            width: 100%;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            max-width: 100%;
+        }
+
+        .company-info {
+            min-width: 0;
+        }
+
+        /* Button styling di card */
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .btn-primary {
+            background-color: #003056;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: #1a4a7a;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    @include('siswa.partials.navbar')
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header Section dengan Background Biru -->
+    <div class="search-header-section">
+        <div class="container">
+            <div class="header-content">
+                <!-- Filter Row -->
+                <div class="filter-row">
+                    <form id="filterForm" action="{{ route('siswa.dudi.index') }}" method="GET">
+                        <input type="hidden" name="provinsi" id="provinsiInput" value="{{ $provinsi ?? '' }}">
+                        <input type="hidden" name="kota" id="kotaInput" value="{{ $kota ?? '' }}">
+                        <div class="search-wrapper">
+                            <div class="search-split">
+                                <div class="location-search" id="locationSearch">
+                                    <div class="search-box" onclick="toggleLocationDropdown()">
+                                        <i class="fas fa-map-pin"></i>
+                                        <span id="selectedLocationText">
+                                            @if($kota)
+                                                {{ ucfirst($kota) }}
+                                            @elseif($provinsi)
+                                                {{ ucfirst($provinsi) }}
+                                            @else
+                                                Lokasi
+                                            @endif
+                                        </span>
+                                        <i class="fas fa-chevron-down chevron"></i>
+                                    </div>
+                                    <div class="location-dropdown" id="locationDropdown">
+                                        <div class="location-tabs">
+                                            <div class="location-tab active" data-level="provinsi" onclick="switchLocationTab('provinsi')">Provinsi</div>
+                                            <div class="location-tab" data-level="kabupaten" onclick="switchLocationTab('kabupaten')">Kab/Kota</div>
+                                        </div>
+
+                                        <div class="location-content" id="provinsiList">
+                                            <div class="location-list">
+                                                @forelse($provinces as $provinsiOption)
+                                                    <div class="location-item" data-provinsi="{{ $provinsiOption }}" onclick="selectProvinsi('{{ $provinsiOption }}')">
+                                                        <i class="fas fa-map"></i>
+                                                        <div class="item-content">
+                                                            <div class="item-name">{{ $provinsiOption }}</div>
+                                                        </div>
+                                                        <span class="item-type">Provinsi</span>
+                                                        <i class="fas fa-check check-icon"></i>
+                                                    </div>
+                                                @empty
+                                                    <div class="location-item">
+                                                        <div class="item-content">
+                                                            <div class="item-name">Tidak ada provinsi</div>
+                                                        </div>
+                                                    </div>
+                                                @endforelse
+                                            </div>
+                                        </div>
+
+                                        <div class="location-content" id="kabupatenList" style="display: none;">
+                                            <div class="back-link" onclick="switchLocationTab('provinsi')">
+                                                <i class="fas fa-arrow-left"></i>
+                                                <span>Kembali ke Provinsi</span>
+                                            </div>
+                                            <div class="location-list" id="kabupatenItems">
+                                                <div class="location-item no-data">
+                                                    <div class="item-content">
+                                                        <div class="item-name">Pilih provinsi terlebih dahulu</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="dudi-search">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="searchInput" name="search" placeholder="Cari nama perusahaan atau bidang..." value="{{ $search ?? '' }}">
+                                    <button type="submit">Cari</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-sort-group">
+                                    <!-- Filter Button -->
+                                    <button type="button" class="filter-sort-btn" id="filterButton" onclick="toggleFilterMenu()">
+                                        <i class="fas fa-sliders-h"></i>
+                                        <span>Filter</span>
+                                    </button>
+                                    
+                                    <!-- Filter Menu -->
+                                    <div class="filter-menu" id="filterMenu">
+                                    <div class="filter-menu-header">
+                                        <i class="fas fa-filter"></i> Filter
+                                    </div>
+                                    
+                                    <div class="filter-menu-content">
+                                        <!-- Filter Jam Kerja -->
+                                        <div class="filter-group">
+                                            <div class="filter-group-title">
+                                                <i class="fas fa-clock"></i> Jam Kerja PKL
+                                            </div>
+                                            <div class="filter-option">
+                                                <input type="radio" name="jamSemua" id="jamSemua" value="semua" checked>
+                                                <label for="jamSemua"><strong>Semua Jam</strong></label>
+                                            </div>
+                                            
+                                            <div class="jam-grid">
+                                                <div class="jam-group">
+                                                    <h4><i class="fas fa-sun"></i> Jam Berangkat</h4>
+                                                    <div class="jam-options" id="jamBerangkatOptions">
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="berangkat0500" name="jam_berangkat[]" value="05.00">
+                                                            <label for="berangkat0500">05.00</label>
+                                                        </div>
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="berangkat0600" name="jam_berangkat[]" value="06.00">
+                                                            <label for="berangkat0600">06.00</label>
+                                                        </div>
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="berangkat0630" name="jam_berangkat[]" value="06.30">
+                                                            <label for="berangkat0630">06.30</label>
+                                                        </div>
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="berangkat0700" name="jam_berangkat[]" value="07.00">
+                                                            <label for="berangkat0700">07.00</label>
+                                                        </div>
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="berangkat0800" name="jam_berangkat[]" value="08.00">
+                                                            <label for="berangkat0800">08.00</label>
+                                                        </div>
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="berangkat0900" name="jam_berangkat[]" value="09.00">
+                                                            <label for="berangkat0900">09.00</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="jam-group">
+                                                    <h4><i class="fas fa-moon"></i> Jam Pulang</h4>
+                                                    <div class="jam-options" id="jamPulangOptions">
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="pulang1430" name="jam_pulang[]" value="14.30">
+                                                            <label for="pulang1430">14.30</label>
+                                                        </div>
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="pulang1500" name="jam_pulang[]" value="15.00">
+                                                            <label for="pulang1500">15.00</label>
+                                                        </div>
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="pulang1530" name="jam_pulang[]" value="15.30">
+                                                            <label for="pulang1530">15.30</label>
+                                                        </div>
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="pulang1600" name="jam_pulang[]" value="16.00">
+                                                            <label for="pulang1600">16.00</label>
+                                                        </div>
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="pulang1700" name="jam_pulang[]" value="17.00">
+                                                            <label for="pulang1700">17.00</label>
+                                                        </div>
+                                                        <div class="jam-option">
+                                                            <input type="checkbox" id="pulang1800" name="jam_pulang[]" value="18.00">
+                                                            <label for="pulang1800">18.00</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Filter Kuota -->
+                                        <div class="filter-group">
+                                            <div class="filter-group-title">
+                                                <i class="fas fa-users"></i> Kuota
+                                            </div>
+                                            <div class="filter-options">
+                                                <div class="filter-option">
+                                                    <input type="radio" name="kuota" id="kuotaSemua" value="semua" {{ !$kuota || $kuota === 'semua' ? 'checked' : '' }}>
+                                                    <label for="kuotaSemua">Semua</label>
+                                                </div>
+                                                <div class="filter-option">
+                                                    <input type="radio" name="kuota" id="kuotaKecil" value="kecil" {{ $kuota === 'kecil' ? 'checked' : '' }}>
+                                                    <label for="kuotaKecil">< 5 orang</label>
+                                                </div>
+                                                <div class="filter-option">
+                                                    <input type="radio" name="kuota" id="kuotaSedang" value="sedang" {{ $kuota === 'sedang' ? 'checked' : '' }}>
+                                                    <label for="kuotaSedang">5-10 orang</label>
+                                                </div>
+                                                <div class="filter-option">
+                                                    <input type="radio" name="kuota" id="kuotaBesar" value="besar" {{ $kuota === 'besar' ? 'checked' : '' }}>
+                                                    <label for="kuotaBesar">> 10 orang</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="filter-menu-footer">
+                                        <button type="button" class="btn-reset" onclick="resetFilters()">Reset</button>
+                                        <button type="button" class="btn-apply" onclick="submitFilterForm()">Terapkan</button>
+                                    </div>
+                                </div>
+                            
+                            <!-- Sort Button -->
+                            <button type="button" class="filter-sort-btn" id="sortButton" onclick="toggleSortMenu()">
+                                <i class="fas fa-arrow-down-up"></i>
+                                <span id="selectedSortText">
+                                    @switch($sort ?? 'default')
+                                        @case('nama-az') A-Z @break
+                                        @case('nama-za') Z-A @break
+                                        @case('kuota-banyak') Kuota Banyak @break
+                                        @case('kuota-sedikit') Kuota Sedikit @break
+                                        @default Urutkan
+                                    @endswitch
+                                </span>
+                            </button>
+                            
+                            <!-- Sort Menu -->
+                            <div class="sort-dropdown-menu" id="sortDropdownMenu">
+                                <input type="hidden" id="sortHiddenInput" name="sort" value="{{ $sort ?? 'default' }}">
+                                <div class="sort-item-option">
+                                    <input type="radio" name="sortOption" value="nama-az" onchange="updateSortAndSubmit('nama-az')" {{ $sort === 'nama-az' ? 'checked' : '' }}>
+                                    <label>A-Z</label>
+                                </div>
+                                <div class="sort-item-option">
+                                    <input type="radio" name="sortOption" value="nama-za" onchange="updateSortAndSubmit('nama-za')" {{ $sort === 'nama-za' ? 'checked' : '' }}>
+                                    <label>Z-A</label>
+                                </div>
+                                <div class="sort-item-option">
+                                    <input type="radio" name="sortOption" value="kuota-banyak" onchange="updateSortAndSubmit('kuota-banyak')" {{ $sort === 'kuota-banyak' ? 'checked' : '' }}>
+                                    <label>Kuota Terbanyak</label>
+                                </div>
+                                <div class="sort-item-option">
+                                    <input type="radio" name="sortOption" value="kuota-sedikit" onchange="updateSortAndSubmit('kuota-sedikit')" {{ $sort === 'kuota-sedikit' ? 'checked' : '' }}>
+                                    <label>Kuota Tersedikit</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Jumlah Lowongan -->
+        <div class="result-count">
+            <i class="fas fa-briefcase"></i>
+            <span id="jobCount">{{ $dudis->total() }}</span> lowongan PKL tersedia
+        </div>
+        
+        <!-- Grid Lowongan - 4 Kolom -->
+        <div class="job-grid" id="jobGrid">
+            @forelse($dudis as $dudi)
+                @php
+                    $jumlahPendaftar = \App\Models\Booking::where('id_dudi', $dudi->id_dudi)->whereIn('status', ['Direview', 'Diterima'])->count();
+                    $kuotaTersisa = max($dudi->kuota - $jumlahPendaftar, 0);
+                @endphp
+                <div class="company-card">
+                    <div class="card-header">
+                        <div class="image-placeholder">
+                            @if($dudi->logo)
+                                <img src="{{ asset('storage/' . $dudi->logo) }}" alt="{{ $dudi->nama_dudi }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">
+                            @else
+                                <i class="fas fa-building"></i>
+                            @endif
+                        </div>
+                        <div class="company-info">                            <div class="company-name">{{ $dudi->nama_dudi }}</div>                            <div class="company-location"><i class="fas fa-map-marker-alt"></i> {{ substr($dudi->alamat, 0, 25) }}{{ strlen($dudi->alamat) > 25 ? '...' : '' }}</div>                        </div>
+                    </div>
+                    <div class="detail-item"><i class="fas fa-user-tie"></i> {{ $dudi->pembimbing_dudi ?? '-' }}</div>
+                    <div class="detail-item"><i class="fas fa-clock"></i> {{ $dudi->jam_masuk ?? '-' }} - {{ $dudi->jam_pulang ?? '-' }}</div>
+                    <div class="kuota-highlight">
+                        <i class="fas fa-users"></i>
+                        <span><span class="kuota-angka">{{ $kuotaTersisa }}</span> dari <span class="kuota-angka">{{ $dudi->kuota ?? '-' }}</span> kuota tersisa</span>
+                    </div>
+                    <button type="button"
+                        class="btn btn-primary view-detail-button"
+                        data-id="{{ $dudi->id_dudi }}"
+                        data-nama="{{ $dudi->nama_dudi ?? '-' }}"
+                        data-industri="{{ $dudi->bidang_usaha ?? '-' }}"
+                        data-alamat="{{ $dudi->alamat ?? '-' }}"
+                        data-location="{{ $dudi->kota ? $dudi->kota . ', Indonesia' : ($dudi->alamat ?? '-') }}"
+                        data-telepon="{{ $dudi->telepon ?? '-' }}"
+                        data-email="{{ $dudi->email ?? '-' }}"
+                        data-website="{{ $dudi->website ?? '-' }}"
+                        data-jumlah-pegawai="{{ $dudi->jumlah_pegawai ?? '-' }}"
+                        data-deskripsi="{{ $dudi->deskripsi ?? '-' }}"
+                        data-jam="{{ $dudi->jam_masuk ?? '-' }} - {{ $dudi->jam_pulang ?? '-' }}"
+                        data-pembimbing="{{ $dudi->pembimbing_dudi ?? '-' }}"
+                        data-kuota-tersisa="{{ $kuotaTersisa }}"
+                        data-kuota-total="{{ $dudi->kuota ?? '-' }}"
+                        data-logo="{{ $dudi->logo ? asset('storage/' . $dudi->logo) : '' }}"
+                        data-sudah-ajukan="{{ $dudi->user_sudah_ajukan ? 'true' : 'false' }}"
+                        data-booking-aktif="{{ $bookingAktif ? 'true' : 'false' }}"
+                        data-booking-aktif-dudi="{{ $bookingAktif ? $bookingAktif->dudi->nama_dudi : '' }}"
+                        data-ajukan-url="{{ route('siswa.dudi.ajukan', $dudi->id_dudi) }}"
+                    >Lihat Detail</button>
+                </div>
+            @empty
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 30px; color: #94a3b8;">
+                    <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                    <h3 style="color: #475569;">Tidak ada DUDI yang sesuai</h3>
+                    <p>Coba ubah filter atau pencarian Anda</p>
+                </div>
+            @endforelse
+        </div>
+
+        <div class="dudi-detail-modal" id="dudiDetailModal" aria-hidden="true">
+            <div class="modal-overlay" id="dudiDetailModalOverlay"></div>
+            <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="dudiDetailTitle">
+                <div class="modal-header">
+                    <h2 id="dudiDetailTitle">Detail DUDI</h2>
+                    <button type="button" class="close-btn" id="dudiDetailClose">✕</button>
+                </div>
+                <div class="company-header">
+                    <div class="logo-placeholder" id="dudiDetailLogo">
+                        <span>🏢</span>
+                    </div>
+                    <div class="company-info-header">
+                        <h3 id="dudiDetailCompanyName">Nama DUDI</h3>
+                        <div class="company-location"><span>📍</span><span id="dudiDetailLocation">Alamat</span></div>
+                    </div>
+                </div>
+
+                    <div class="section">
+                        <h4>Persyaratan Umum</h4>
+                        <div class="info-grid">
+                            <div class="info-label">Jam Kerja</div>
+                            <div class="info-value" id="dudiDetailJam"></div>
+
+                            <div class="info-label">Penanggung Jawab</div>
+                            <div class="info-value" id="dudiDetailPembimbing"></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h4>Tentang Perusahaan</h4>
+                        <div class="info-grid">
+                            <div class="info-label">Industri</div>
+                            <div class="info-value" id="dudiDetailBidang"></div>
+
+                            <div class="info-label">Jumlah Pegawai</div>
+                            <div class="info-value" id="dudiDetailJumlahPegawai"></div>
+
+                            <div class="info-label">Website</div>
+                            <div class="info-value" id="dudiDetailWebsite"></div>
+
+                            <div class="info-label">No. Telepon</div>
+                            <div class="info-value" id="dudiDetailTelepon"></div>
+
+                            <div class="info-label">Email</div>
+                            <div class="info-value" id="dudiDetailEmail"></div>
+                        </div>
+
+                        <div class="company-description" id="dudiDetailDescription">Deskripsi perusahaan akan tampil di sini.</div>
+                    </div>
+
+                    <div class="kuota-section">
+                        <div class="kuota-display">
+                            <div class="kuota-row">
+                                <i class="fas fa-users"></i>
+                                <div class="kuota-info">
+                                    <span class="kuota-available" id="dudiDetailKuotaAvailable">0</span>
+                                    <span>dari</span>
+                                    <span class="kuota-total" id="dudiDetailKuotaTotal">0</span>
+                                    <span>kuota tersisa</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-message" id="dudiWarningMessage" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="warningText"></span>
+                    </div>
+
+                    <div class="apply-btn-wrapper">
+                        <button type="button" id="dudiDetailApply" class="apply-btn">Lamar Sekarang</button>
+                    </div>
+            </div>
+        </div>
+        
+        <!-- Akhir Hasil Pencarian -->
+        @if($dudis->count() > 0)
+        <div class="search-footer">
+            <i class="fas fa-circle"></i>
+            <span>Akhir dari hasil pencarian</span>
+            <i class="fas fa-circle"></i>
+        </div>
+        @endif
+
+        <!-- Pagination -->
+        @if($dudis->hasPages() && $dudis->total() >= 100)
+        <div class="pagination">
+            {{-- Previous Page Link --}}
+            @if ($dudis->onFirstPage())
+                <span class="disabled">← Sebelumnya</span>
+            @else
+                <a href="{{ $dudis->previousPageUrl() }}">← Sebelumnya</a>
+            @endif
+
+            {{-- Page Number Links --}}
+            @foreach ($dudis->getUrlRange(1, $dudis->lastPage()) as $page => $url)
+                @if ($page == $dudis->currentPage())
+                    <span class="active"><span>{{ $page }}</span></span>
+                @else
+                    <a href="{{ $url }}">{{ $page }}</a>
+                @endif
+            @endforeach
+
+            {{-- Next Page Link --}}
+            @if ($dudis->hasMorePages())
+                <a href="{{ $dudis->nextPageUrl() }}">Selanjutnya →</a>
+            @else
+                <span class="disabled">Selanjutnya →</span>
+            @endif
+        </div>
+        @endif
+    </div>
+
+    <script>
+        const dudiDetailModal = document.getElementById('dudiDetailModal');
+        const dudiDetailOverlay = document.getElementById('dudiDetailModalOverlay');
+        const dudiDetailClose = document.getElementById('dudiDetailClose');
+        const dudiDetailLogo = document.getElementById('dudiDetailLogo');
+        const dudiDetailCompanyName = document.getElementById('dudiDetailCompanyName');
+        const dudiDetailLocation = document.getElementById('dudiDetailLocation');
+        const dudiDetailBidang = document.getElementById('dudiDetailBidang');
+        const dudiDetailPembimbing = document.getElementById('dudiDetailPembimbing');
+        const dudiDetailJam = document.getElementById('dudiDetailJam');
+        const dudiDetailKuotaAvailable = document.getElementById('dudiDetailKuotaAvailable');
+        const dudiDetailKuotaTotal = document.getElementById('dudiDetailKuotaTotal');
+        const dudiDetailTelepon = document.getElementById('dudiDetailTelepon');
+        const dudiDetailEmail = document.getElementById('dudiDetailEmail');
+        const dudiDetailDescription = document.getElementById('dudiDetailDescription');
+        const dudiDetailWebsite = document.getElementById('dudiDetailWebsite');
+        const dudiDetailJumlahPegawai = document.getElementById('dudiDetailJumlahPegawai');
+        const dudiDetailApply = document.getElementById('dudiDetailApply');
+        const warningMessage = document.getElementById('dudiWarningMessage');
+        const warningText = document.getElementById('warningText');
+
+        function openDudiDetailModal(button) {
+            const data = button.dataset;
+            dudiDetailCompanyName.textContent = data.nama || 'Detail DUDI';
+            dudiDetailLocation.textContent = data.location || data.alamat || '-';
+            dudiDetailBidang.textContent = data.industri || '-';
+            dudiDetailPembimbing.textContent = data.pembimbing || '-';
+            dudiDetailJam.textContent = data.jam || '-';
+            dudiDetailTelepon.textContent = data.telepon || '-';
+            dudiDetailEmail.textContent = data.email || '-';
+            dudiDetailWebsite.textContent = data.website || '-';
+            dudiDetailJumlahPegawai.textContent = data.jumlahPegawai || '-';
+            dudiDetailDescription.textContent = data.deskripsi || '-';
+
+            // Set kuota
+            const kuotaTersisa = parseInt(data.kuotaTersisa) || 0;
+            const kuotaTotal = data.kuotaTotal;
+            dudiDetailKuotaAvailable.textContent = kuotaTersisa;
+            dudiDetailKuotaTotal.textContent = kuotaTotal;
+
+            // Store data for form submission
+            dudiDetailApply.dataset.dudiId = data.id || '';
+            dudiDetailApply.dataset.ajukanUrl = data.ajukanUrl || '';
+
+            // Check conditions and show warnings
+            const sudahAjukan = data.sudahAjukan === 'true';
+            const bookingAktif = data.bookingAktif === 'true';
+            const bookingAktifDudi = data.bookingAktifDudi || '';
+            const kuotaPenuh = kuotaTersisa <= 0;
+
+            warningMessage.style.display = 'none';
+            dudiDetailApply.disabled = false;
+            dudiDetailApply.textContent = 'Lamar Sekarang';
+
+            // Check conditions in order
+            if (sudahAjukan) {
+                warningMessage.style.display = 'flex';
+                warningText.textContent = '✓ Anda sudah mengajukan PKL ke perusahaan ini. Silakan cek status di halaman Booking PKL.';
+                warningMessage.style.backgroundColor = '#d1fae5';
+                warningMessage.style.borderColor = '#6ee7b7';
+                warningMessage.style.color = '#047857';
+                warningMessage.querySelector('i').style.color = '#047857';
+                dudiDetailApply.disabled = true;
+                dudiDetailApply.textContent = 'Sudah Diajukan';
+            } else if (kuotaPenuh) {
+                warningMessage.style.display = 'flex';
+                warningText.textContent = '❌ Kuota pendaftar untuk DUDI ini sudah penuh. Anda tidak dapat mendaftar ke DUDI ini.';
+                warningMessage.style.backgroundColor = '#fee2e2';
+                warningMessage.style.borderColor = '#fca5a5';
+                warningMessage.style.color = '#dc2626';
+                warningMessage.querySelector('i').style.color = '#dc2626';
+                dudiDetailApply.disabled = true;
+                dudiDetailApply.textContent = 'Kuota Penuh';
+            } else if (bookingAktif) {
+                warningMessage.style.display = 'flex';
+                warningText.textContent = 'Anda sudah memiliki pengajuan PKL yang sedang direview ke ' + bookingAktifDudi + '. Anda hanya bisa punya 1 pengajuan hingga status diterima atau ditolak.';
+                warningMessage.style.backgroundColor = '#fef3c7';
+                warningMessage.style.borderColor = '#fcd34d';
+                warningMessage.style.color = '#b45309';
+                warningMessage.querySelector('i').style.color = '#b45309';
+                dudiDetailApply.disabled = true;
+                dudiDetailApply.textContent = 'Pengajuan Aktif';
+            }
+
+            if (data.logo) {
+                dudiDetailLogo.innerHTML = '<img src="' + data.logo + '" alt="' + (data.nama || 'Logo') + '" style="width: 100%; height: 100%; object-fit: cover; border-radius: 18px;">';
+            } else {
+                dudiDetailLogo.innerHTML = '<span>🏢</span>';
+            }
+
+            dudiDetailModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDudiDetailModal() {
+            dudiDetailModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.querySelectorAll('.view-detail-button').forEach(button => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                openDudiDetailModal(this);
+            });
+        });
+
+        dudiDetailOverlay.addEventListener('click', closeDudiDetailModal);
+        dudiDetailClose.addEventListener('click', closeDudiDetailModal);
+        
+        dudiDetailApply.addEventListener('click', function () {
+            if (!this.disabled) {
+                const ajukanUrl = this.dataset.ajukanUrl;
+                if (ajukanUrl) {
+                    // Create form and submit
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = ajukanUrl;
+                    form.innerHTML = '<input type="hidden" name="_token" value="' + document.querySelector('meta[name="csrf-token"]').content + '">';
+                    document.body.appendChild(form);
+                    form.submit();
+                    document.body.removeChild(form);
+                }
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeDudiDetailModal();
+            }
+        });
+    </script>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-logo-container">
+                    <div class="footer-logo-text">VOHISIX</div>
+                </div>
+                <p class="footer-subtitle">
+                    Booking PKL adalah platform resmi SMK Negeri 6 Malang untuk memudahkan siswa dalam mencari, melamar, dan memantau proses PKL secara digital.
+                </p>
+            </div>
+            
+            <div class="footer-middle">
+                <div class="footer-section info-section">
+                    <div class="section-content">
+                        <h3 class="footer-title">Informasi Sekolah</h3>
+                        <div class="contact-info">
+                            <p><i class="fas fa-school"></i> SMK Negeri 6 Malang</p>
+                            <p><i class="fas fa-map-marker-alt"></i> JL. Ki Ageng Gribig no.28</p>
+                            <p><i class="fas fa-phone"></i> Telp: (0341) 720138</p>
+                            <p><i class="fas fa-envelope"></i> smkn6malang@sch.id</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer-section bantuan-section">
+                    <div class="section-content">
+                        <h3 class="footer-title">Bantuan</h3>
+                        <ul class="footer-links">
+                            <li><a href="#">FAQ</a></li>
+                            <li><a href="#">Panduan Penggunaan</a></li>
+                            <li><a href="#">Cara Upload</a></li>
+                            <li><a href="#">Cara Melamar</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="footer-section pembuat-section">
+                    <div class="section-content">
+                        <h3 class="footer-title">Pembuat</h3>
+                        <ul class="pembuat-list">
+                            <li>Cantika Egaraisya R</li>
+                            <li>Mega Yuliani</li>
+                            <li>Aditya Fabian</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="footer-section medsos-vertical-section">
+                    <div class="section-content">
+                        <div class="social-vertical">
+                            <a href="#" class="social-item instagram">
+                                <span class="social-icon-small"><i class="fab fa-instagram"></i></span>
+                                <span>Instagram</span>
+                            </a>
+                            <a href="#" class="social-item tiktok">
+                                <span class="social-icon-small"><i class="fab fa-tiktok"></i></span>
+                                <span>TikTok</span>
+                            </a>
+                            <a href="#" class="social-item facebook">
+                                <span class="social-icon-small"><i class="fab fa-facebook-f"></i></span>
+                                <span>Facebook</span>
+                            </a>
+                            <a href="#" class="social-item youtube">
+                                <span class="social-icon-small"><i class="fab fa-youtube"></i></span>
+                                <span>YouTube</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; <span id="currentYear"></span> All Rights Reserved. Booking PKL.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const selectedProvinsi = @json($provinsi ?? '');
+        const selectedKota = @json($kota ?? '');
+        const provinces = @json($provinces ?? []);
+        const kabupatensByProvince = @json($kabupatensByProvince ?? []);
+
+        let currentLevel = 'provinsi';
+        let activeProvince = selectedProvinsi || '';
+
+        if (!activeProvince && selectedKota) {
+            activeProvince = Object.keys(kabupatensByProvince).find(provinsi => kabupatensByProvince[provinsi].includes(selectedKota)) || '';
+        }
+
+        function toggleLocationDropdown() {
+            const dropdown = document.getElementById('locationDropdown');
+            dropdown.classList.toggle('active');
+            if (dropdown.classList.contains('active')) {
+                switchLocationTab(currentLevel);
+            }
+        }
+
+        function selectProvinsi(provinsiName) {
+            activeProvince = provinsiName;
+            document.getElementById('provinsiInput').value = provinsiName;
+            document.getElementById('kotaInput').value = '';
+            updateSelectedLocation(provinsiName);
+            switchLocationTab('kabupaten');
+            loadKabupaten(provinsiName);
+        }
+
+        function selectKota(kotaName) {
+            const kotaInput = document.getElementById('kotaInput');
+            const provinsiInput = document.getElementById('provinsiInput');
+            kotaInput.value = kotaName;
+            if (activeProvince) {
+                provinsiInput.value = activeProvince;
+            }
+            updateSelectedLocation(kotaName);
+            submitFilterForm();
+            closeLocationDropdown();
+        }
+
+        function closeLocationDropdown() {
+            document.getElementById('locationDropdown').classList.remove('active');
+        }
+
+        function updateSelectedLocation(locationText = '') {
+            const text = document.getElementById('selectedLocationText');
+            if (text) {
+                text.textContent = locationText || 'Lokasi';
+            }
+        }
+
+        function switchLocationTab(level) {
+            currentLevel = level;
+            document.querySelectorAll('.location-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.location-tab[data-level="${level}"]`).classList.add('active');
+
+            document.getElementById('provinsiList').style.display = level === 'provinsi' ? 'block' : 'none';
+            document.getElementById('kabupatenList').style.display = level === 'kabupaten' ? 'block' : 'none';
+
+            if (level === 'kabupaten') {
+                loadKabupaten(activeProvince);
+            }
+        }
+
+        function loadKabupaten(provinsiName) {
+            const container = document.getElementById('kabupatenItems');
+            container.innerHTML = '';
+
+            const kabupatens = kabupatensByProvince[provinsiName] || [];
+            if (!provinsiName || kabupatens.length === 0) {
+                const item = document.createElement('div');
+                item.className = 'location-item no-data';
+                item.innerHTML = `
+                    <div class="item-content">
+                        <div class="item-name">Pilih provinsi terlebih dahulu</div>
+                    </div>`;
+                container.appendChild(item);
+                return;
+            }
+
+            const allItem = document.createElement('div');
+            allItem.className = 'location-item';
+            allItem.onclick = () => selectProvinsiFilter(provinsiName);
+            allItem.innerHTML = `
+                <i class="fas fa-globe"></i>
+                <div class="item-content">
+                    <div class="item-name">Semua ${provinsiName}</div>
+                </div>
+                <span class="item-type">Provinsi</span>
+                <i class="fas fa-check check-icon"></i>
+            `;
+            container.appendChild(allItem);
+
+            kabupatens.forEach(kab => {
+                const item = document.createElement('div');
+                item.className = 'location-item';
+                item.onclick = () => selectKota(kab);
+                item.innerHTML = `
+                    <i class="fas fa-city"></i>
+                    <div class="item-content">
+                        <div class="item-name">${kab}</div>
+                    </div>
+                    <span class="item-type">Kab/Kota</span>
+                    <i class="fas fa-check check-icon"></i>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function selectProvinsiFilter(provinsiName) {
+            document.getElementById('provinsiInput').value = provinsiName;
+            document.getElementById('kotaInput').value = '';
+            updateSelectedLocation(provinsiName);
+            submitFilterForm();
+        }
+
+        function backToProvinsi() {
+            switchLocationTab('provinsi');
+        }
+
+        // ==================== FILTER FUNCTIONS ====================
+        function toggleFilterMenu() {
+            document.getElementById('filterMenu').classList.toggle('active');
+        }
+
+        function toggleSortMenu() {
+            const menu = document.getElementById('sortDropdownMenu');
+            if (menu) {
+                menu.classList.toggle('active');
+            }
+        }
+
+        function resetFilters() {
+            document.querySelectorAll('.filter-menu input[type="radio"]').forEach(input => {
+                input.checked = input.value === 'semua';
+            });
+            document.querySelectorAll('.filter-menu input[type="checkbox"]').forEach(input => {
+                input.checked = false;
+            });
+        }
+
+        function applyFiltersForm() {
+            submitFilterForm();
+        }
+
+        function submitFilterForm() {
+            document.getElementById('filterForm').submit();
+        }
+
+        function updateSortAndSubmit(sortValue) {
+            document.getElementById('sortHiddenInput').value = sortValue;
+            
+            // Update display text
+            const displayText = {
+                'nama-az': 'A-Z',
+                'nama-za': 'Z-A',
+                'kuota-banyak': 'Kuota Banyak',
+                'kuota-sedikit': 'Kuota Sedikit'
+            };
+            document.getElementById('selectedSortText').textContent = displayText[sortValue] || 'Urutkan';
+            
+            // Close dropdown
+            document.getElementById('sortDropdownMenu').classList.remove('active');
+            
+            // Submit form
+            document.getElementById('filterForm').submit();
+        }
+
+        function closeAllMenus() {
+            document.getElementById('filterMenu')?.classList.remove('active');
+            document.getElementById('sortDropdownMenu')?.classList.remove('active');
+            closeLocationDropdown();
+            closeSidebar();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.filter-menu') && !event.target.closest('#filterButton')) {
+                const filterMenu = document.getElementById('filterMenu');
+                if (filterMenu) filterMenu.classList.remove('active');
+            }
+            if (!event.target.closest('.sort-dropdown-menu') && !event.target.closest('#sortButton')) {
+                const sortMenu = document.getElementById('sortDropdownMenu');
+                if (sortMenu) sortMenu.classList.remove('active');
+            }
+            if (!event.target.closest('.location-dropdown') && !event.target.closest('.location-search .search-box')) {
+                closeLocationDropdown();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const year = new Date().getFullYear();
+            document.getElementById('currentYear').textContent = year;
+            updateSelectedLocation(selectedKota);
+            
+            // Uncheck "Semua Jam" ketika ada checkbox jam yang dicek
+            document.querySelectorAll('input[name="jam_berangkat[]"], input[name="jam_pulang[]"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const berangkatChecked = Array.from(document.querySelectorAll('input[name="jam_berangkat[]"]:checked')).length > 0;
+                    const pulangChecked = Array.from(document.querySelectorAll('input[name="jam_pulang[]"]:checked')).length > 0;
+                    if (berangkatChecked || pulangChecked) {
+                        document.getElementById('jamSemua').checked = false;
+                    }
+                });
+            });
+            
+            // Reset filters function
+            window.resetFilters = function() {
+                document.querySelectorAll('.filter-menu input[type="checkbox"], .filter-menu input[type="radio"]').forEach(input => {
+                    input.checked = false;
+                });
+                document.getElementById('jamSemua').checked = true;
+            };
+            
+            // Add sort button event listener
+            const sortBtn = document.querySelector('.sort-btn');
+            if (sortBtn) {
+                sortBtn.addEventListener('click', toggleSortDropdown);
+            }
+        });
+    </script>
+</body>
+</html>
+
+
