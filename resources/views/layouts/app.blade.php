@@ -601,6 +601,8 @@
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ asset('css/layout-shared.css') }}">
+    @stack('styles')
 </head>
 <body>
     @include('layouts.partials.navbar')
@@ -626,6 +628,8 @@
     </main>
 
     @include('layouts.partials.footer')
+    <button id="backToTop" class="back-to-top" title="Kembali ke atas">↑</button>
     @include('layouts.partials.scripts')
+    @stack('scripts')
 </body>
 </html>
