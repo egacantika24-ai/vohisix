@@ -28,9 +28,15 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     
     Route::resource('/admin/siswa', AdminSiswaController::class, ['names' => 'admin.siswa']);
+    Route::post('/admin/siswa/import', [AdminSiswaController::class, 'import'])->name('admin.siswa.import');
+
     Route::resource('/admin/dudi', AdminDudiController::class, ['names' => 'admin.dudi']);
+    Route::post('/admin/dudi/import', [AdminDudiController::class, 'import'])->name('admin.dudi.import');
+
     Route::resource('/admin/booking', AdminBookingController::class, ['names' => 'admin.booking']);
+
     Route::resource('/admin/login', AdminLoginController::class, ['names' => 'admin.login']);
+    Route::post('/admin/login/import', [AdminLoginController::class, 'import'])->name('admin.login.import');
 });
 
 // Siswa Routes

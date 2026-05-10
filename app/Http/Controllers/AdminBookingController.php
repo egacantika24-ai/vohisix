@@ -23,8 +23,7 @@ class AdminBookingController extends Controller
         if ($search) {
             $bookings->whereHas('siswa', function($query) use ($search) {
                 $query->where('nama', 'like', "%$search%")
-                      ->orWhere('nis', 'like', "%$search%")
-                      ->orWhereRaw('SOUNDEX(nama) = SOUNDEX(?)', [$search]);
+                      ->orWhere('nis', 'like', "%$search%");
             });
         }
 

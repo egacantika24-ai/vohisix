@@ -226,6 +226,18 @@
         </form>
     </div>
 
+    <div class="toolbar-panel" style="margin-bottom: 20px;">
+        <div>
+            <h2>Impor Data User</h2>
+            <p style="margin: 8px 0 0; color:#6b7a91; font-size:14px;">Unggah file Excel / CSV untuk membuat akun pengguna Admin dan Siswa secara masal.</p>
+        </div>
+        <form action="{{ route('admin.login.import') }}" method="POST" enctype="multipart/form-data" class="toolbar-grid">
+            @csrf
+            <input type="file" name="file" accept=".csv,.xlsx" required />
+            <button type="submit">Unggah Excel</button>
+        </form>
+    </div>
+
     <div class="table-card">
         <table>
             <thead>

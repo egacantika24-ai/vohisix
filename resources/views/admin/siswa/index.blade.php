@@ -202,6 +202,28 @@
     color: #64748b;
     background: #e7eef7;
 }
+.doc-pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.doc-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.doc-pill.uploaded {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
 .no-data {
     padding: 48px 0;
     text-align: center;
@@ -255,7 +277,6 @@
     <div class="hero-stats">
         <div class="hero-stat"><strong>{{ $totalSiswa }}</strong><span>Total Siswa</span></div>
         <div class="hero-stat"><strong>{{ $totalBerkas }}</strong><span>Total Berkas</span></div>
-        <div class="hero-stat"><strong>{{ $totalBooking }}</strong><span>Total Booking</span></div>
     </div>
 </div>
 
@@ -283,15 +304,28 @@
         </form>
     </div>
 
+    <div class="toolbar-panel" style="margin-bottom: 20px;">
+        <div>
+            <h2>Impor Data Siswa</h2>
+            <p style="margin: 8px 0 0; color:#6b7a91; font-size:14px;">Unggah file Excel / CSV untuk menambahkan banyak siswa sekaligus.</p>
+        </div>
+        <form action="{{ route('admin.siswa.import') }}" method="POST" enctype="multipart/form-data" class="toolbar-grid">
+            @csrf
+            <input type="file" name="file" accept=".csv,.xlsx" required />
+            <button type="submit">Unggah Excel</button>
+        </form>
+    </div>
+
     <div class="table-card">
         <table>
             <thead>
                 <tr>
                     <th style="width:70px;">No</th>
                     <th style="width:100px;">Foto</th>
-                    <th>NIS</th>
                     <th>Nama</th>
+                    <th>NIS</th>
                     <th>Kelas</th>
+                    <th>Verifikasi Berkas</th>
                     <th style="width:180px;">Aksi</th>
                 </tr>
             </thead>
@@ -306,9 +340,16 @@
                                 <div class="avatar-placeholder">No Image</div>
                             @endif
                         </td>
-                        <td>{{ $siswa->nis }}</td>
                         <td><strong>{{ $siswa->nama }}</strong></td>
+                        <td>{{ $siswa->nis }}</td>
                         <td>{{ $siswa->kelas }}</td>
+                        <td>
+                            <div class="doc-pill-group">
+                                <span class="doc-pill {{ $siswa->berkas && $siswa->berkas->ktp_kia ? 'uploaded' : '' }}">KTP/KIA</span>
+                                <span class="doc-pill {{ $siswa->berkas && $siswa->berkas->surat_sehat ? 'uploaded' : '' }}">SEHAT</span>
+                                <span class="doc-pill {{ $siswa->berkas && $siswa->berkas->kartu_bpjs ? 'uploaded' : '' }}">BPJS</span>
+                            </div>
+                        </td>
                         <td>
                             <div class="action-group">
                                 <a href="{{ route('admin.siswa.edit', $siswa->nis) }}" class="edit">Edit</a>
@@ -322,7 +363,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="no-data">Tidak ada data siswa</td>
+                        <td colspan="7" class="no-data">Tidak ada data siswa</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -32,8 +32,7 @@ class SiswaDudiController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nama_dudi', 'like', "%$search%")
-                  ->orWhere('bidang_usaha', 'like', "%$search%")
-                  ->orWhereRaw('SOUNDEX(nama_dudi) = SOUNDEX(?)', [$search]);
+                  ->orWhere('bidang_usaha', 'like', "%$search%");
             });
         }
 

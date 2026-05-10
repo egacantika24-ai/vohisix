@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Dudi;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Traits\ExcelImportTrait;
 
 class AdminDudiController extends Controller
 {
+    use ExcelImportTrait;
     /**
      * Display a listing of dudis
      */
@@ -22,8 +24,7 @@ class AdminDudiController extends Controller
             $dudis->where(function($q) use ($search) {
                 $q->where('nama_dudi', 'like', "%$search%")
                   ->orWhere('bidang_usaha', 'like', "%$search%")
-                  ->orWhere('alamat', 'like', "%$search%")
-                  ->orWhereRaw('SOUNDEX(nama_dudi) = SOUNDEX(?)', [$search]);
+                  ->orWhere('alamat', 'like', "%$search%");
             });
         }
 
@@ -150,5 +151,59 @@ class AdminDudiController extends Controller
         $dudi->delete();
 
         return redirect()->route('admin.dudi.index')->with('success', 'DUDI berhasil dihapus');
+    }
+
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => 'required|file|mimes:csv,txt,xlsx|max:5120',
+        ]);
+
+        $rows = $this->parseImportFile($request->file('file'));
+        if (empty($rows)) {
+            return redirect()->route('admin.dudi.index')->with('error', 'File tidak dapat dibaca. Gunakan format CSV atau XLSX dengan header yang tepat.');
+        }
+
+        $imported = 0;
+        $skipped = 0;
+        foreach ($rows as $row) {
+            $nama_dudi = $row['nama_dudi'] ?? null;
+            if (!$nama_dudi) {
+                $skipped++;
+                continue;
+            }
+
+            $data = [
+                'alamat' => $row['alamat'] ?? null,
+                'telepon' => $row['telepon'] ?? null,
+                'email' => $row['email'] ?? null,
+                'deskripsi' => $row['deskripsi'] ?? null,
+                'bidang_usaha' => $row['bidang_usaha'] ?? null,
+                'website' => $row['website'] ?? null,
+                'jumlah_pegawai' => $row['jumlah_pegawai'] ?? null,
+                'pembimbing_dudi' => $row['pembimbing_dudi'] ?? null,
+                'jam_masuk' => $row['jam_masuk'] ?? null,
+                'jam_pulang' => $row['jam_pulang'] ?? null,
+                'kota' => $row['kota'] ?? null,
+                'kuota' => is_numeric($row['kuota'] ?? null) ? (int) $row['kuota'] : 5,
+            ];
+
+            $existing = Dudi::where('nama_dudi', $nama_dudi)->first();
+            if ($existing) {
+                $existing->update($data);
+                $skipped++;
+                continue;
+            }
+
+            Dudi::create(array_merge(['nama_dudi' => $nama_dudi], $data));
+            $imported++;
+        }
+
+        $message = "$imported DUDI berhasil diimpor";
+        if ($skipped > 0) {
+            $message .= ", $skipped baris dilewati karena nama DUDI kosong atau sudah ada";
+        }
+
+        return redirect()->route('admin.dudi.index')->with('success', $message);
     }
 }

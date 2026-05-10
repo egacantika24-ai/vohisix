@@ -7,9 +7,11 @@ use App\Models\User;
 use App\Models\Berkas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Traits\ExcelImportTrait;
 
 class AdminSiswaController extends Controller
 {
+    use ExcelImportTrait;
     /**
      * Display a listing of siswas
      */
@@ -19,14 +21,13 @@ class AdminSiswaController extends Controller
         $kelas = $request->input('kelas');
         $sortBy = $request->input('sort_by', 'newest');
 
-        $siswas = Siswa::query();
+        $siswas = Siswa::with('berkas');
 
         if ($search) {
             $siswas->where(function($q) use ($search) {
                 $q->where('nama', 'like', "%$search%")
                   ->orWhere('nis', 'like', "%$search%")
-                  ->orWhere('kelas', 'like', "%$search%")
-                  ->orWhereRaw('SOUNDEX(nama) = SOUNDEX(?)', [$search]);
+                  ->orWhere('kelas', 'like', "%$search%");
             });
         }
 
@@ -208,5 +209,63 @@ class AdminSiswaController extends Controller
         $siswa->delete();
 
         return redirect()->route('admin.siswa.index')->with('success', 'Siswa berhasil dihapus');
+    }
+
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => 'required|file|mimes:csv,txt,xlsx|max:5120',
+        ]);
+
+        $rows = $this->parseImportFile($request->file('file'));
+        if (empty($rows)) {
+            return redirect()->route('admin.siswa.index')->with('error', 'File tidak dapat dibaca. Gunakan format CSV atau XLSX dengan header yang tepat.');
+        }
+
+        $imported = 0;
+        $skipped = 0;
+        foreach ($rows as $row) {
+            $nis = $row['nis'] ?? null;
+            $nama = $row['nama'] ?? null;
+            $kelas = $row['kelas'] ?? null;
+
+            if (!$nis || !$nama || !$kelas) {
+                $skipped++;
+                continue;
+            }
+
+            $existing = Siswa::find($nis);
+            if ($existing) {
+                $skipped++;
+                continue;
+            }
+
+            Siswa::create([
+                'nis' => $nis,
+                'nama' => $nama,
+                'kelas' => $kelas,
+            ]);
+
+            User::create([
+                'username' => $nis,
+                'name' => $nama,
+                'role' => 'siswa',
+                'password' => Hash::make($nis),
+            ]);
+
+            Berkas::create([
+                'nis' => $nis,
+                'lengkap' => false,
+            ]);
+
+            $imported++;
+        }
+
+        $message = "$imported siswa berhasil diimpor";
+        if ($skipped > 0) {
+            $message .= ", $skipped baris dilewati karena data tidak lengkap atau NIS sudah ada";
+        }
+
+        return redirect()->route('admin.siswa.index')->with('success', $message);
     }
 }

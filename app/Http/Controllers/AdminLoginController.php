@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Traits\ExcelImportTrait;
 
 class AdminLoginController extends Controller
 {
+    use ExcelImportTrait;
     /**
      * Display a listing of users
      */
@@ -22,8 +24,7 @@ class AdminLoginController extends Controller
         if ($search) {
             $users->where(function($q) use ($search) {
                 $q->where('username', 'like', "%$search%")
-                  ->orWhere('name', 'like', "%$search%")
-                  ->orWhereRaw('SOUNDEX(name) = SOUNDEX(?)', [$search]);
+                  ->orWhere('name', 'like', "%$search%");
             });
         }
 
@@ -138,5 +139,57 @@ class AdminLoginController extends Controller
         $user->delete();
 
         return redirect()->route('admin.login.index')->with('success', 'User berhasil dihapus');
+    }
+
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => 'required|file|mimes:csv,txt,xlsx|max:5120',
+        ]);
+
+        $rows = $this->parseImportFile($request->file('file'));
+        if (empty($rows)) {
+            return redirect()->route('admin.login.index')->with('error', 'File tidak dapat dibaca. Gunakan format CSV atau XLSX dengan header username, name, role, password.');
+        }
+
+        $imported = 0;
+        $skipped = 0;
+        foreach ($rows as $row) {
+            $username = $row['username'] ?? null;
+            $name = $row['name'] ?? null;
+            $role = $row['role'] ?? null;
+            $password = $row['password'] ?? null;
+
+            if (!$username || !$name || !$role || !$password || !in_array($role, ['admin', 'siswa'])) {
+                $skipped++;
+                continue;
+            }
+
+            $user = User::where('username', $username)->first();
+            if ($user) {
+                $user->update([
+                    'name' => $name,
+                    'role' => $role,
+                    'password' => Hash::make($password),
+                ]);
+                $skipped++;
+                continue;
+            }
+
+            User::create([
+                'username' => $username,
+                'name' => $name,
+                'role' => $role,
+                'password' => Hash::make($password),
+            ]);
+            $imported++;
+        }
+
+        $message = "$imported user berhasil diimpor";
+        if ($skipped > 0) {
+            $message .= ", $skipped baris dilewati karena format tidak lengkap atau username sudah ada";
+        }
+
+        return redirect()->route('admin.login.index')->with('success', $message);
     }
 }

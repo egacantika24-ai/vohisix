@@ -191,7 +191,6 @@
     <div class="hero-stats">
         <div class="hero-stat"><strong>{{ $totalDudi }}</strong><span>Total DUDI</span></div>
         <div class="hero-stat"><strong>{{ $totalKuota }}</strong><span>Total Kuota</span></div>
-        <div class="hero-stat"><strong>{{ $bukuTerdaftar }}</strong><span>Terdaftar</span></div>
     </div>
 </div>
 
@@ -219,16 +218,34 @@
         </form>
     </div>
 
+    <div class="toolbar-panel" style="margin-bottom: 20px;">
+        <div>
+            <h2>Impor Data DUDI</h2>
+            <p style="margin: 8px 0 0; color:#6b7a91; font-size:14px;">Unggah file Excel / CSV untuk menambahkan banyak DUDI dalam satu kali proses.</p>
+        </div>
+        <form action="{{ route('admin.dudi.import') }}" method="POST" enctype="multipart/form-data" class="toolbar-grid">
+            @csrf
+            <input type="file" name="file" accept=".csv,.xlsx" required />
+            <button type="submit">Unggah Excel</button>
+        </form>
+    </div>
+
     <div class="table-card">
         <table>
             <thead>
                 <tr>
                     <th style="width:70px;">No</th>
                     <th>Nama DUDI</th>
-                    <th>Bidang Usaha</th>
                     <th>Alamat</th>
-                    <th>Telepon</th>
-                    <th style="width:140px;">Kuota</th>
+                    <th style="width:120px;">Jam Berangkat</th>
+                    <th style="width:120px;">Jam Pulang</th>
+                    <th>Bidang Industri</th>
+                    <th style="width:120px;">Jumlah Pegawai</th>
+                    <th>Website</th>
+                    <th>No. Telp</th>
+                    <th>Email</th>
+                    <th style="width:120px;">Kuota</th>
+                    <th>Penanggung Jawab</th>
                     <th style="width:180px;">Aksi</th>
                 </tr>
             </thead>
@@ -237,14 +254,22 @@
                     <tr>
                         <td>{{ ($dudis->currentPage() - 1) * $dudis->perPage() + $loop->iteration }}</td>
                         <td><strong>{{ $dudi->nama_dudi }}</strong></td>
-                        <td>{{ $dudi->bidang_usaha }}</td>
                         <td>{{ $dudi->alamat }}</td>
-                        <td>{{ $dudi->telepon }}</td>
-                        <td style="text-align:center;">
-                            @php $jumlahPendaftar = \App\Models\Booking::where('id_dudi', $dudi->id_dudi)->whereIn('status', ['Direview', 'Diterima'])->count(); @endphp
-                            <strong>{{ $dudi->kuota ?? 0 }}</strong><br>
-                            <small style="color:#6b7a91; font-size:12px;">({{ $jumlahPendaftar }} terdaftar)</small>
+                        <td>{{ $dudi->jam_masuk ?? '-' }}</td>
+                        <td>{{ $dudi->jam_pulang ?? '-' }}</td>
+                        <td>{{ $dudi->bidang_usaha }}</td>
+                        <td>{{ $dudi->jumlah_pegawai }}</td>
+                        <td>
+                            @if($dudi->website)
+                                <a href="{{ preg_match('/^https?:\/\//', $dudi->website) ? $dudi->website : 'https://' . $dudi->website }}" target="_blank" rel="noreferrer">{{ $dudi->website }}</a>
+                            @endif
                         </td>
+                        <td>{{ $dudi->telepon }}</td>
+                        <td>{{ $dudi->email }}</td>
+                        <td style="text-align:center;">
+                            <strong>{{ $dudi->kuota ?? 0 }}</strong>
+                        </td>
+                        <td>{{ $dudi->pembimbing_dudi }}</td>
                         <td>
                             <div class="action-group">
                                 <a href="{{ route('admin.dudi.edit', $dudi->id_dudi) }}" class="edit">Edit</a>
@@ -258,7 +283,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="no-data">Tidak ada data DUDI</td>
+                        <td colspan="13" class="no-data">Tidak ada data DUDI</td>
                     </tr>
                 @endforelse
             </tbody>
