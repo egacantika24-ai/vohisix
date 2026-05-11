@@ -3,182 +3,215 @@
 @section('title', 'Data DUDI')
 
 @section('content')
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-.page-hero {
-    background: linear-gradient(135deg, #003056 0%, #0b416a 100%);
-    border-radius: 24px;
-    color: #fff;
-    padding: 32px 28px;
-    margin-bottom: 32px;
-}
-.page-hero h1 {
-    margin-bottom: 8px;
-    font-size: 2.25rem;
-    line-height: 1.05;
-}
-.page-hero p {
-    margin-bottom: 24px;
-    color: rgba(255,255,255,.88);
-    max-width: 700px;
-}
-.page-hero .hero-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 18px;
-}
-.hero-stat {
-    background: rgba(255,255,255,.12);
-    border: 1px solid rgba(255,255,255,.18);
-    border-radius: 20px;
-    padding: 18px 20px;
-}
-.hero-stat strong {
-    display: block;
-    font-size: 1.95rem;
-    margin-bottom: 6px;
-}
-.hero-stat span {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .2em;
-    color: rgba(255,255,255,.82);
-}
-.section-title {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-}
-.section-title h2 {
-    margin: 0;
-    font-size: 1.35rem;
-    color: #fff;
-}
-.toolbar-panel {
-    background: #f4f8fd;
-    border: 1px solid #d8e5f4;
-    border-radius: 18px;
-    padding: 22px;
-    margin-bottom: 20px;
-}
-.toolbar-grid {
-    display: grid;
-    grid-template-columns: 1fr minmax(180px,220px) minmax(180px,220px) minmax(140px,180px);
-    gap: 14px;
-    align-items: center;
-}
-.toolbar-grid input,
-.toolbar-grid select {
-    width: 100%;
-    padding: 13px 14px;
-    border: 1px solid #dbe8f5;
-    border-radius: 14px;
-    background: #fff;
-    font-size: 14px;
-    color: #1f3b5a;
-}
-.toolbar-grid button {
-    padding: 13px 18px;
-    border: none;
-    border-radius: 14px;
-    background: #003056;
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background .2s, transform .2s;
-}
-.toolbar-grid button:hover {
-    background: #002542;
-    transform: translateY(-1px);
-}
-.table-card {
-    overflow-x: auto;
-    border-radius: 20px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
-}
-.table-card table {
-    width: 100%;
-    min-width: 900px;
-    border-collapse: collapse;
-}
-.table-card th,
-.table-card td {
-    padding: 16px 14px;
-    text-align: left;
-    vertical-align: middle;
-}
-.table-card th {
-    background: #eef5fb;
-    color: #003056;
-    font-size: 12px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    border-bottom: 1px solid #e2e8f0;
-}
-.table-card td {
-    border-bottom: 1px solid #f1f5f9;
-    color: #475569;
-    font-size: 14px;
-}
-.table-card tbody tr:hover {
-    background: #f7fbff;
-}
-.action-group {
-    display: flex;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-.action-group a,
-.action-group button {
-    border-radius: 14px;
-    padding: 10px 14px;
-    text-decoration: none;
-    border: 1px solid transparent;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all .2s;
-}
-.action-group a.edit {
-    background: #eef6ff;
-    color: #0f4d8d;
-    border-color: #d6e8ff;
-}
-.action-group button.delete {
-    background: #fff1f2;
-    color: #ac1b2f;
-    border-color: #f6d7dc;
-}
-.action-group button.delete:hover {
-    background: #fde2e5;
-}
-.no-data {
-    padding: 48px 0;
-    text-align: center;
-    color: #667485;
-    font-size: 15px;
-}
-@media (max-width: 860px) {
-    .toolbar-grid {
-        grid-template-columns: 1fr;
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
-    .page-hero {
-        padding: 24px 20px;
+    body {
+        font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+        background-color: #f0f4f8;
     }
-}
-@media (max-width: 560px) {
-    .section-title {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .toolbar-grid button {
-        width: 100%;
-    }
-}
+    .bg-navy { background-color: #003056; }
+    .text-navy { color: #003056; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
 </style>
+
+<div class="min-h-screen bg-[#f0f4f8]">
+    <!-- Header -->
+    <header class="bg-[#003056] text-white px-6 lg:px-8 py-6 shadow-lg relative overflow-hidden">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+            <div>
+                <h1 class="text-2xl lg:text-3xl font-bold tracking-tight mb-1">Data Perusah aan (DUDI)</h1>
+                <p class="text-slate-300 text-sm opacity-80">Portal Administrasi Program Praktik Kerja Lapangan Terpadu</p>
+            </div>
+            <div class="flex gap-6">
+                <div class="text-center border-r border-white/20 pr-6">
+                    <span class="block text-2xl lg:text-3xl font-bold text-white">{{ $totalDudi }}</span>
+                    <span class="text-[9px] lg:text-[10px] uppercase tracking-[0.2em] text-slate-300 font-bold">Total DUDI</span>
+                </div>
+                <div class="text-center">
+                    <span class="block text-2xl lg:text-3xl font-bold text-white">{{ $totalKuota }}</span>
+                    <span class="text-[9px] lg:text-[10px] uppercase tracking-[0.2em] text-slate-300 font-bold">Total Kuota</span>
+                </div>
+            </div>
+        </div>
+        <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6 lg:py-8">
+        <div class="bg-white rounded-xl lg:rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+            <!-- Toolbar -->
+            <div class="bg-slate-50 p-4 lg:p-6 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                    <div class="relative flex-1 sm:flex-initial">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
+                        <input type="text" placeholder="Cari Nama atau Bidang Industri..." class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-[#003056]/20 focus:border-[#003056] transition-all bg-white font-medium" value="{{ $search ?? '' }}" name="search">
+                    </div>
+                    <div class="relative flex-1 sm:flex-initial">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                                <polygon points="22 3 2 3 10 13 10 21 14 18 14 13 22 3"></polygon>
+                            </svg>
+                        </div>
+                        <select class="bg-white border border-slate-300 rounded-lg text-sm pl-10 pr-8 py-2 outline-none focus:ring-2 focus:ring-[#003056]/20 focus:border-[#003056] transition-all appearance-none cursor-pointer w-full sm:w-auto font-medium" name="bidang_usaha">
+                            <option value="">Semua Bidang</option>
+                            @foreach($allBidang as $bidangItem)
+                                <option value="{{ $bidangItem }}" {{ ($bidang == $bidangItem) ? 'selected' : '' }}>{{ $bidangItem }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <a href="{{ route('admin.dudi.create') }}" class="bg-[#003056] hover:bg-[#001f38] text-white px-6 py-2 rounded-lg text-sm font-bold transition shadow-md flex items-center gap-2 w-full md:w-auto justify-center">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Tambah DUDI Baru
+                </a>
+            </div>
+
+            <!-- Table - Responsive scroll -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left min-w-[1200px]">
+                    <thead>
+                        <tr class="bg-[#003056] text-white text-[10px] lg:text-[11px] uppercase font-bold tracking-wider border-b border-white/10">
+                            <th class="px-4 lg:px-6 py-4 text-center w-16">No</th>
+                            <th class="px-4 lg:px-6 py-4">Nama DUDI</th>
+                            <th class="px-4 lg:px-6 py-4">Alamat</th>
+                            <th class="px-4 lg:px-6 py-4 text-center">Jam Berangkat</th>
+                            <th class="px-4 lg:px-6 py-4 text-center">Jam Pulang</th>
+                            <th class="px-4 lg:px-6 py-4">Bidang Industri</th>
+                            <th class="px-4 lg:px-6 py-4 text-center">Jumlah Pegawai</th>
+                            <th class="px-4 lg:px-6 py-4">Website</th>
+                            <th class="px-4 lg:px-6 py-4">No. Telp</th>
+                            <th class="px-4 lg:px-6 py-4">Email</th>
+                            <th class="px-4 lg:px-6 py-4 text-center">Kuota</th>
+                            <th class="px-4 lg:px-6 py-4">Penanggung Jawab</th>
+                            <th class="px-4 lg:px-6 py-4 text-right sticky right-0 bg-[#003056]">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($dudis as $dudi)
+                            <tr class="hover:bg-slate-50/50 transition-colors group animate-fadeIn">
+                                <td class="px-4 lg:px-6 py-4 text-center text-slate-400 font-mono text-xs">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
+                                <td class="px-4 lg:px-6 py-4">
+                                    <div class="font-bold text-[#003056] text-sm">{{ $dudi->nama_dudi }}</div>
+                                </td>
+                                <td class="px-4 lg:px-6 py-4">
+                                    <div class="text-slate-500 font-semibold text-xs leading-relaxed max-w-xs">{{ $dudi->alamat }}</div>
+                                </td>
+                                <td class="px-4 lg:px-6 py-4 text-center">
+                                    <span class="bg-[#003056]/5 px-2 py-1 rounded text-[#003056] font-bold text-xs">{{ $dudi->jam_masuk ?? '-' }}</span>
+                                </td>
+                                <td class="px-4 lg:px-6 py-4 text-center">
+                                    <span class="bg-slate-100 px-2 py-1 rounded text-slate-500 font-bold text-xs">{{ $dudi->jam_pulang ?? '-' }}</span>
+                                </td>
+                                <td class="px-4 lg:px-6 py-4 text-slate-700 font-semibold text-xs">{{ $dudi->bidang_usaha }}</td>
+                                <td class="px-4 lg:px-6 py-4 text-center font-bold text-slate-500 italic text-xs">{{ $dudi->jumlah_pegawai }}</td>
+                                <td class="px-4 lg:px-6 py-4">
+                                    @if($dudi->website)
+                                        <a href="{{ preg_match('/^https?:\/\//', $dudi->website) ? $dudi->website : 'https://' . $dudi->website }}" target="_blank" rel="noreferrer" class="text-blue-500 font-bold italic text-xs hover:underline flex items-center gap-1">
+                                            {{ $dudi->website }}
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                                <polyline points="15 3 21 3 21 9"></polyline>
+                                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                                            </svg>
+                                        </a>
+                                    @else
+                                        <span class="text-slate-400">-</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 lg:px-6 py-4 font-semibold text-slate-600 text-xs">{{ $dudi->telepon }}</td>
+                                <td class="px-4 lg:px-6 py-4 font-semibold text-slate-600 text-xs">{{ $dudi->email }}</td>
+                                <td class="px-4 lg:px-6 py-4 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-base lg:text-lg font-black text-[#003056] leading-none">{{ $dudi->kuota ?? 0 }}</span>
+                                        <span class="text-[8px] font-bold text-slate-400">(0 Terdaftar)</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 lg:px-6 py-4">
+                                    <div class="font-bold text-slate-700 text-xs">{{ $dudi->pembimbing_dudi }}</div>
+                                </td>
+                                <td class="px-4 lg:px-6 py-4 text-right sticky right-0 bg-white/95 backdrop-blur-sm group-hover:bg-transparent">
+                                    <div class="flex justify-end gap-1">
+                                        <a href="{{ route('admin.dudi.edit', $dudi->id_dudi) }}" class="text-[#003056] hover:text-[#003056]/70 p-1.5 hover:bg-[#003056]/5 rounded-lg transition-all">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M17 3l4 4-7 7H10v-4l7-7z"></path>
+                                                <path d="M4 20h16"></path>
+                                            </svg>
+                                        </a>
+                                        <form action="{{ route('admin.dudi.destroy', $dudi->id_dudi) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition-all" onclick="return confirm('Yakin ingin menghapus?')">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M3 6h18"></path>
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                                    <path d="M8 4V2h8v2"></path>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="13" class="px-6 py-16 text-center text-slate-300">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-10">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                        <p class="font-bold text-xs uppercase tracking-widest">Data Tidak Ditemukan</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-[#003056] text-white/70 px-4 lg:px-8 py-5 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] lg:text-[10px] uppercase font-bold tracking-[0.2em]">
+                <div class="flex items-center gap-3">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/50">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                    </svg>
+                    <span>Total data tersimpan: <span class="text-white font-black">{{ $totalDudi }}</span> perusahaan</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/50">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Terakhir diperbarui: <span class="text-white font-medium">{{ now()->format('d F Y, H:i') }}</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center pb-8">
+            <p class="text-slate-400 text-[8px] lg:text-[9px] uppercase tracking-[0.3em] font-black">Sistem Informasi PKL Terpadu © 2026 • Professional Edition</p>
+        </div>
+    </main>
+</div>
 
 <div class="page-hero">
     <div class="section-title">

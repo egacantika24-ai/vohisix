@@ -3,101 +3,179 @@
 @section('title', 'Manajemen Login')
 
 @section('content')
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-.page-hero {
-    background: linear-gradient(135deg, #003056 0%, #0b416a 100%);
-    border-radius: 24px;
-    color: #fff;
-    padding: 32px 28px;
-    margin-bottom: 32px;
-}
-.page-hero h1 {
-    margin-bottom: 8px;
-    font-size: 2.25rem;
-    line-height: 1.05;
-}
-.page-hero p {
-    margin-bottom: 24px;
-    color: rgba(255,255,255,.88);
-    max-width: 700px;
-}
-.page-hero .hero-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 18px;
-}
-.hero-stat {
-    background: rgba(255,255,255,.12);
-    border: 1px solid rgba(255,255,255,.18);
-    border-radius: 20px;
-    padding: 18px 20px;
-}
-.hero-stat strong {
-    display: block;
-    font-size: 1.95rem;
-    margin-bottom: 6px;
-}
-.hero-stat span {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .2em;
-    color: rgba(255,255,255,.82);
-}
-.section-title {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-}
-.section-title h2 {
-    margin: 0;
-    font-size: 1.35rem;
-    color: #fff;
-}
-.toolbar-panel {
-    background: #f4f8fd;
-    border: 1px solid #d8e5f4;
-    border-radius: 18px;
-    padding: 22px;
-    margin-bottom: 20px;
-}
-.toolbar-grid {
-    display: grid;
-    grid-template-columns: 1fr minmax(160px,200px) minmax(160px,200px) minmax(140px,180px);
-    gap: 14px;
-    align-items: center;
-}
-.toolbar-grid input,
-.toolbar-grid select {
-    width: 100%;
-    padding: 13px 14px;
-    border: 1px solid #dbe8f5;
-    border-radius: 14px;
-    background: #fff;
-    font-size: 14px;
-    color: #1f3b5a;
-}
-.toolbar-grid button {
-    padding: 13px 18px;
-    border: none;
-    border-radius: 14px;
-    background: #003056;
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background .2s, transform .2s;
-}
-.toolbar-grid button:hover {
-    background: #002542;
-    transform: translateY(-1px);
-}
-.table-card {
-    overflow-x: auto;
-    border-radius: 20px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+        background-color: #f0f4f8;
+    }
+    .bg-primary { background-color: #003056; }
+    .text-primary { color: #003056; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #003056; border-radius: 10px; }
+</style>
+
+<div class="min-h-screen bg-[#f0f4f8]">
+    <!-- Header -->
+    <header class="bg-primary text-white px-8 py-8 shadow-lg">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight mb-1">Manajemen Login</h1>
+                <p class="text-slate-300 text-sm opacity-80">Kelola akun user (Admin & Siswa) untuk akses sistem PKL</p>
+            </div>
+            <div class="flex gap-8">
+                <div class="text-center border-r border-white/20 pr-8">
+                    <span class="block text-3xl font-bold text-white">{{ $totalUser }}</span>
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-bold">Total User</span>
+                </div>
+                <div class="text-center border-r border-white/20 pr-8">
+                    <span class="block text-3xl font-bold text-white">{{ $totalAdmin }}</span>
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-bold">Admin</span>
+                </div>
+                <div class="text-center">
+                    <span class="block text-3xl font-bold text-white">{{ $totalSiswa }}</span>
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-bold">Siswa</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+            <!-- Toolbar -->
+            <div class="bg-slate-50 p-6 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
+                        <input type="text" placeholder="Cari username atau nama..." class="pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white" value="{{ $search ?? '' }}" name="search">
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                                <polygon points="22 3 2 3 10 13 10 21 14 18 14 13 22 3"></polygon>
+                            </svg>
+                        </div>
+                        <select class="bg-white border border-slate-300 rounded-lg text-sm pl-10 pr-8 py-2.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none cursor-pointer w-full" name="role">
+                            <option value="">Semua Role</option>
+                            <option value="admin" {{ ($roleFilter == 'admin') ? 'selected' : '' }}>Admin</option>
+                            <option value="siswa" {{ ($roleFilter == 'siswa') ? 'selected' : '' }}>Siswa</option>
+                        </select>
+                    </div>
+                </div>
+                <a href="{{ route('admin.login.create') ?? '#' }}" class="bg-primary hover:bg-[#002542] text-white px-8 py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center gap-2 w-full md:w-auto justify-center">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Tambah User Baru
+                </a>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-primary/5 text-primary text-[11px] uppercase font-bold tracking-widest border-b border-slate-200">
+                            <th class="px-6 py-5 w-16 text-center">No</th>
+                            <th class="px-6 py-5">Username</th>
+                            <th class="px-6 py-5">Nama Lengkap</th>
+                            <th class="px-6 py-5 w-32 text-center">Role</th>
+                            <th class="px-6 py-5 text-right w-32">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($users ?? [] as $user)
+                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                                <td class="px-6 py-4 text-center text-slate-400 font-mono text-xs">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-primary text-sm">{{ $user->username ?? $user->email }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-slate-700 text-sm">{{ $user->name }}</div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    @if($user->role === 'admin')
+                                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-[10px] font-bold uppercase tracking-wider">Admin</span>
+                                    @else
+                                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold uppercase tracking-wider">Siswa</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-1">
+                                        <a href="" class="text-primary hover:text-primary/70 p-1.5 hover:bg-primary/5 rounded-lg transition-all" title="Edit">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M17 3l4 4L7 21H3v-4L17 3z"></path>
+                                            </svg>
+                                        </a>
+                                        <form action="" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition-all" title="Hapus" onclick="return confirm('Yakin ingin menghapus?')">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M3 6h18"></path>
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-20 text-center text-slate-300">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-10">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                        <p class="font-bold text-xs uppercase tracking-widest">Data Tidak Ditemukan</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-primary text-white/70 px-8 py-5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase font-bold tracking-[0.2em]">
+                <div class="flex items-center gap-3">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/50">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                        <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path>
+                    </svg>
+                    <span>Total user terdaftar: <span class="text-white font-black">{{ $totalUser ?? 0 }}</span> akun</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/50">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Terakhir diperbarui: <span class="text-white font-medium">{{ now()->format('d F Y, H:i') }}</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center pb-12">
+            <p class="text-slate-400 text-[9px] uppercase tracking-[0.3em] font-black">Sistem Informasi PKL Terpadu © 2026 • Professional Edition</p>
+        </div>
+    </main>
+</div>
 }
 .table-card table {
     width: 100%;

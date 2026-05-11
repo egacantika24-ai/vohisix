@@ -3,51 +3,192 @@
 @section('title', 'Data Siswa PKL')
 
 @section('content')
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-.page-hero {
-    background: linear-gradient(135deg, #003056 0%, #0b416a 100%);
-    border-radius: 24px;
-    color: #fff;
-    padding: 32px 28px;
-    margin-bottom: 32px;
-}
-.page-hero h1 {
-    margin-bottom: 8px;
-    font-size: 2.25rem;
-    line-height: 1.05;
-}
-.page-hero p {
-    margin-bottom: 24px;
-    color: rgba(255,255,255,.88);
-    max-width: 700px;
-}
-.page-hero .hero-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 18px;
-}
-.hero-stat {
-    background: rgba(255,255,255,.12);
-    border: 1px solid rgba(255,255,255,.18);
-    border-radius: 20px;
-    padding: 18px 20px;
-}
-.hero-stat strong {
-    display: block;
-    font-size: 1.95rem;
-    margin-bottom: 6px;
-}
-.hero-stat span {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .2em;
-    color: rgba(255,255,255,.82);
-}
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+        background-color: #f0f4f8;
+    }
+    .bg-primary { background-color: #003056; }
+    .text-primary { color: #003056; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #003056; border-radius: 10px; }
+</style>
+
+<div class="min-h-screen bg-[#f0f4f8]">
+    <!-- Header -->
+    <header class="bg-primary text-white px-8 py-8 shadow-lg">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight mb-1">Data Siswa PKL</h1>
+                <p class="text-slate-300 text-sm opacity-80">Portal Administrasi Program Praktik Kerja Lapangan Terpadu</p>
+            </div>
+            <div class="flex gap-8">
+                <div class="text-center border-r border-white/20 pr-8">
+                    <span class="block text-3xl font-bold text-white">{{ $totalSiswa }}</span>
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-bold">Total Siswa</span>
+                </div>
+                <div class="text-center">
+                    <span class="block text-3xl font-bold text-white">{{ $totalBerkas }}</span>
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-bold">Total Berkas</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+            <!-- Toolbar -->
+            <div class="bg-slate-50 p-6 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
+                        <input type="text" placeholder="Cari NIS atau Nama..." class="pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white" value="{{ $search ?? '' }}" name="search">
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                                <polygon points="22 3 2 3 10 13 10 21 14 18 14 13 22 3"></polygon>
+                            </svg>
+                        </div>
+                        <select class="bg-white border border-slate-300 rounded-lg text-sm pl-10 pr-8 py-2.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none cursor-pointer w-full" name="kelas">
+                            <option value="">Semua Kelas</option>
+                            @foreach($allKelas as $k)
+                                <option value="{{ $k }}" {{ ($kelas == $k) ? 'selected' : '' }}>{{ $k }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <a href="{{ route('admin.siswa.create') }}" class="bg-primary hover:bg-[#002542] text-white px-8 py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center gap-2 w-full md:w-auto justify-center">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Tambah Siswa Baru
+                </a>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-primary/5 text-primary text-[11px] uppercase font-bold tracking-widest border-b border-slate-200">
+                            <th class="px-6 py-5 w-16 text-center">No</th>
+                            <th class="px-6 py-5 w-24">Foto</th>
+                            <th class="px-6 py-5">Nama</th>
+                            <th class="px-6 py-5">NIS</th>
+                            <th class="px-6 py-5 w-32 text-center">Kelas</th>
+                            <th class="px-6 py-5">Verifikasi Berkas</th>
+                            <th class="px-6 py-5 text-right">Kelola</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($siswas as $siswa)
+                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                                <td class="px-6 py-4 text-center text-slate-400 font-mono text-xs">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="w-12 h-12 rounded-full border-2 border-primary/30 p-0.5 overflow-hidden shadow-sm bg-slate-100 transition-transform group-hover:scale-105">
+                                        @if($siswa->foto)
+                                            <img src="{{ asset('storage/' . $siswa->foto) }}" alt="{{ $siswa->nama }}" class="w-full h-full rounded-full object-cover">
+                                        @else
+                                            <div class="w-full h-full rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-500 uppercase font-bold">
+                                                {{ substr($siswa->nama, 0, 2) }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-primary text-sm">{{ $siswa->nama }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-slate-500 font-mono text-xs">{{ $siswa->nis }}</div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="px-3 py-1 bg-slate-100 border border-slate-200 text-slate-600 rounded-full text-[10px] font-bold uppercase tracking-wider">{{ $siswa->kelas }}</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex gap-2">
+                                        <button class="px-2.5 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded text-[9px] font-black uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm">KTP/KIA</button>
+                                        <button class="px-2.5 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded text-[9px] font-black uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm">SEHAT</button>
+                                        <button class="px-2.5 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded text-[9px] font-black uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm">BPJS</button>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-1">
+                                        <a href="{{ route('admin.siswa.edit', $siswa->id) }}" class="text-primary hover:text-primary/70 p-1.5 hover:bg-primary/5 rounded-lg transition-all" title="Edit">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M17 3l4 4L7 21H3v-4L17 3z"></path>
+                                            </svg>
+                                        </a>
+                                        <form action="{{ route('admin.siswa.destroy', $siswa->id) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition-all" title="Hapus" onclick="return confirm('Yakin ingin menghapus?')">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M3 6h18"></path>
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="px-6 py-20 text-center text-slate-300">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-10">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                        <p class="font-bold text-xs uppercase tracking-widest">Data Tidak Ditemukan</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-primary text-white/70 px-8 py-5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase font-bold tracking-[0.2em]">
+                <div class="flex items-center gap-3">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/50">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                        <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path>
+                    </svg>
+                    <span>Total data tersimpan: <span class="text-white font-black">{{ $totalSiswa }}</span> siswa</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/50">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Terakhir diperbarui: <span class="text-white font-medium">{{ now()->format('d F Y, H:i') }}</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center pb-12">
+            <p class="text-slate-400 text-[9px] uppercase tracking-[0.3em] font-black">Sistem Informasi PKL Terpadu © 2026 • Professional Edition</p>
+        </div>
+    </main>
+</div>
     bottom: 0;
     background: rgba(0,0,0,.45);
     display: flex;

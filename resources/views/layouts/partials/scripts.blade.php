@@ -1,41 +1,41 @@
 <script>
-    const hamburger = document.getElementById('hamburger');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    const backToTop = document.getElementById('backToTop');
+    document.addEventListener('DOMContentLoaded', function() {
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
 
-    if (hamburger && sidebar && overlay) {
-        hamburger.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        });
+        if (hamburger && sidebar && overlay) {
+            hamburger.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
 
-        overlay.addEventListener('click', function() {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-        });
-    }
-
-    if (sidebar && overlay) {
-        document.querySelectorAll('.sidebar-nav-item').forEach(link => {
-            link.addEventListener('click', function() {
+            overlay.addEventListener('click', function() {
                 sidebar.classList.remove('active');
                 overlay.classList.remove('active');
             });
-        });
-    }
 
-    if (backToTop) {
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 220) {
-                backToTop.classList.add('show');
-            } else {
-                backToTop.classList.remove('show');
-            }
-        });
+            document.querySelectorAll('.sidebar-nav-item, .sidebar-menu a').forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            });
+        }
 
-        backToTop.addEventListener('click', function() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
+        const scrollButton = document.getElementById('scrollToTop');
+        if (scrollButton) {
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    scrollButton.classList.add('show');
+                } else {
+                    scrollButton.classList.remove('show');
+                }
+            });
+
+            scrollButton.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+    });
 </script>
